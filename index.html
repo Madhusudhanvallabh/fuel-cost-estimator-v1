@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Cost Calculator</title>
+    <meta name="description" content="Calculate your trip fuel costs and toll expenses with our easy-to-use travel cost calculator. Track your travel expenses efficiently.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #475569;
+            font-size: 1.125rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 3rem 0.75rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 0.875rem;
+            pointer-events: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #047857;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: #eff6ff;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #fef2f2;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .result-item {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid;
+        }
+
+        .result-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-item-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .result-item-value {
+            font-weight: 600;
+        }
+
+        .result-item-desc {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .fuel-required {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .fuel-cost {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .fuel-cost .result-item-value {
+            color: #1d4ed8;
+        }
+
+        .toll-cost {
+            background: #fff7ed;
+            border-color: #fed7aa;
+        }
+
+        .toll-cost .result-item-value {
+            color: #ea580c;
+        }
+
+        .total-cost {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+        }
+
+        .total-cost .result-item-value {
+            color: #059669;
+            font-size: 1.5rem;
+        }
+
+        .cost-per-km {
+            background: #fef3c7;
+            border-color: #fde68a;
+        }
+
+        .cost-per-km .result-item-value {
+            color: #d97706;
+        }
+
+        .trip-history {
+            margin-top: 2rem;
+        }
+
+        .trip-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .trip-item:hover {
+            background: #f9fafb;
+        }
+
+        .trip-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .trip-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .trip-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .trip-detail-label {
+            color: #374151;
+        }
+
+        .trip-detail-value {
+            font-weight: 600;
+        }
+
+        .trip-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+            opacity: 0.3;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: #1f2937;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        .toast.success {
+            background: #059669;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .icon {
+            width: 1rem;
+            height: 1rem;
+            display: inline-block;
+        }
+
+        .icon-lg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .icon-xl {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <svg class="icon-xl" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Fuel Cost Calculator
+            </h1>
+            <p>Calculate your trip fuel costs and track your travel expenses</p>
+        </div>
+
+        <div class="grid">
+            <!-- Calculator Form -->
+            <div class="card">
+                <h2 class="section-title">
+                    <svg class="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    Trip Calculator
+                </h2>
+
+                <form id="calculatorForm">
+                    <!-- Distance Input -->
+                    <div class="form-group">
+                        <label class="form-label" for="distance">Distance (km)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="distance" class="form-input" placeholder="Enter distance in kilometers" min="0" step="0.1" required>
+                            <span class="input-suffix">km</span>
+                        </div>
+                    </div>
+
+                    <!-- Fuel Price Input -->
+                    <div class="form-group">
+                        <label class="form-label" for="fuelPrice">Fuel Price (per liter)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="fuelPrice" class="form-input" placeholder="Enter fuel price per liter" min="0" step="0.01" required>
+                            <span class="input-suffix">₹/L</span>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Mileage Input -->
+                    <div class="form-group">
+                        <label class="form-label" for="mileage">Vehicle Mileage (km/l)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="mileage" class="form-input" placeholder="Enter vehicle mileage" min="0" step="0.1" required>
+                            <span class="input-suffix">km/L</span>
+                        </div>
+                    </div>
+
+                    <!-- Toll Count Input -->
+                    <div class="form-group">
+                        <label class="form-label" for="tollCount">Number of Tolls (optional)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="tollCount" class="form-input" placeholder="Enter number of tolls" min="0" step="1">
+                            <span class="input-suffix">tolls</span>
+                        </div>
+                    </div>
+
+                    <!-- Toll Fees Input -->
+                    <div class="form-group">
+                        <label class="form-label" for="tollFees">Toll Fee per Toll (optional)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="tollFees" class="form-input" placeholder="Enter fee per toll" min="0" step="0.01">
+                            <span class="input-suffix">₹</span>
+                        </div>
+                    </div>
+
+                    <!-- Calculate Button -->
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        Calculate Trip Cost
+                    </button>
+                </form>
+            </div>
+
+            <!-- Calculation Results -->
+            <div class="card">
+                <h2 class="section-title">
+                    <svg class="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                    Trip Results
+                </h2>
+
+                <div id="resultsContainer" class="results-grid">
+                    <!-- Fuel Required -->
+                    <div class="result-item fuel-required">
+                        <div class="result-item-header">
+                            <div class="result-item-label">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Fuel Required
+                            </div>
+                            <span id="fuelRequired" class="result-item-value">--</span>
+                        </div>
+                        <div class="result-item-desc">liters</div>
+                    </div>
+
+                    <!-- Fuel Cost -->
+                    <div class="result-item fuel-cost">
+                        <div class="result-item-header">
+                            <div class="result-item-label">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Fuel Cost
+                            </div>
+                            <span id="fuelCost" class="result-item-value">--</span>
+                        </div>
+                        <div class="result-item-desc">fuel only</div>
+                    </div>
+
+                    <!-- Toll Cost -->
+                    <div id="tollCostContainer" class="result-item toll-cost hidden">
+                        <div class="result-item-header">
+                            <div class="result-item-label">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Toll Cost
+                            </div>
+                            <span id="tollCost" class="result-item-value">--</span>
+                        </div>
+                        <div id="tollCostDesc" class="result-item-desc">tolls</div>
+                    </div>
+
+                    <!-- Total Cost -->
+                    <div class="result-item total-cost">
+                        <div class="result-item-header">
+                            <div class="result-item-label">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                </svg>
+                                Total Cost
+                            </div>
+                            <span id="totalCost" class="result-item-value">--</span>
+                        </div>
+                        <div class="result-item-desc">fuel + tolls</div>
+                    </div>
+
+                    <!-- Cost per Kilometer -->
+                    <div class="result-item cost-per-km">
+                        <div class="result-item-header">
+                            <div class="result-item-label">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 013.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                </svg>
+                                Cost per KM
+                            </div>
+                            <span id="costPerKm" class="result-item-value">--</span>
+                        </div>
+                        <div class="result-item-desc">₹/km</div>
+                    </div>
+                </div>
+
+                <!-- Copy and Save Buttons -->
+                <div class="btn-grid">
+                    <button id="copyBtn" class="btn btn-outline" disabled>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        <span id="copyBtnText">Copy Results</span>
+                    </button>
+                    <button id="saveBtn" class="btn btn-success" disabled>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                        </svg>
+                        Save Trip
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trip History Section -->
+        <div class="card trip-history">
+            <h2 class="section-title">
+                <svg class="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Recent Trips
+                <span style="margin-left: auto; font-size: 0.875rem; font-weight: normal; color: #6b7280;">(Last 5 trips)</span>
+            </h2>
+
+            <div id="tripHistoryContainer">
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 013.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                    </svg>
+                    <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">No trips saved yet</p>
+                    <p style="font-size: 0.875rem;">Calculate and save your first trip to see it here</p>
+                </div>
+            </div>
+
+            <div id="clearAllContainer" class="hidden" style="margin-top: 1.5rem; text-align: center;">
+                <button id="clearAllBtn" class="btn btn-danger">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Clear All Trips
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Application state
+        let currentCalculation = null;
+        let trips = JSON.parse(localStorage.getItem('fuelCalculatorTrips') || '[]');
+        let nextTripId = parseInt(localStorage.getItem('fuelCalculatorNextId') || '1');
+
+        // DOM elements
+        const form = document.getElementById('calculatorForm');
+        const distanceInput = document.getElementById('distance');
+        const fuelPriceInput = document.getElementById('fuelPrice');
+        const mileageInput = document.getElementById('mileage');
+        const tollCountInput = document.getElementById('tollCount');
+        const tollFeesInput = document.getElementById('tollFees');
+        const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const tripHistoryContainer = document.getElementById('tripHistoryContainer');
+        const clearAllContainer = document.getElementById('clearAllContainer');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const toast = document.getElementById('toast');
+
+        // Result display elements
+        const fuelRequiredEl = document.getElementById('fuelRequired');
+        const fuelCostEl = document.getElementById('fuelCost');
+        const tollCostEl = document.getElementById('tollCost');
+        const tollCostContainer = document.getElementById('tollCostContainer');
+        const tollCostDesc = document.getElementById('tollCostDesc');
+        const totalCostEl = document.getElementById('totalCost');
+        const costPerKmEl = document.getElementById('costPerKm');
+        const copyBtnText = document.getElementById('copyBtnText');
+
+        // Initialize the application
+        function init() {
+            renderTripHistory();
+            
+            // Add event listeners
+            form.addEventListener('submit', handleCalculate);
+            copyBtn.addEventListener('click', handleCopy);
+            saveBtn.addEventListener('click', handleSave);
+            clearAllBtn.addEventListener('click', handleClearAll);
+            
+            // Auto-calculate on input changes
+            [distanceInput, fuelPriceInput, mileageInput, tollCountInput, tollFeesInput].forEach(input => {
+                input.addEventListener('input', handleAutoCalculate);
+            });
+        }
+
+        // Handle form submission
+        function handleCalculate(e) {
+            e.preventDefault();
+            calculateTripCost();
+        }
+
+        // Auto-calculate when inputs change
+        function handleAutoCalculate() {
+            if (distanceInput.value && fuelPriceInput.value && mileageInput.value) {
+                calculateTripCost();
+            }
+        }
+
+        // Calculate trip cost
+        function calculateTripCost() {
+            const distance = parseFloat(distanceInput.value);
+            const fuelPrice = parseFloat(fuelPriceInput.value);
+            const mileage = parseFloat(mileageInput.value);
+            const tollCount = parseFloat(tollCountInput.value) || 0;
+            const tollFee = parseFloat(tollFeesInput.value) || 0;
+
+            // Validation
+            if (isNaN(distance) || isNaN(fuelPrice) || isNaN(mileage) || distance <= 0 || fuelPrice <= 0 || mileage <= 0) {
+                showToast('Please enter valid positive numbers for distance, fuel price, and mileage.', 'error');
+                return;
+            }
+
+            if (tollCount < 0 || tollFee < 0) {
+                showToast('Toll count and fees cannot be negative.', 'error');
+                return;
+            }
+
+            // Calculate values
+            const fuelRequired = distance / mileage;
+            const fuelCost = fuelRequired * fuelPrice;
+            const totalTollCost = tollCount * tollFee;
+            const totalCost = fuelCost + totalTollCost;
+            const costPerKm = totalCost / distance;
+
+            currentCalculation = {
+                distance,
+                fuelPrice,
+                mileage,
+                tollCount,
+                tollFees: tollFee,
+                fuelRequired,
+                fuelCost,
+                totalCost,
+                costPerKm
+            };
+
+            updateResultsDisplay();
+        }
+
+        // Update results display
+        function updateResultsDisplay() {
+            if (!currentCalculation) {
+                fuelRequiredEl.textContent = '--';
+                fuelCostEl.textContent = '--';
+                tollCostEl.textContent = '--';
+                totalCostEl.textContent = '--';
+                costPerKmEl.textContent = '--';
+                copyBtn.disabled = true;
+                saveBtn.disabled = true;
+                tollCostContainer.classList.add('hidden');
+                return;
+            }
+
+            const { fuelRequired, fuelCost, totalCost, costPerKm, tollCount, tollFees } = currentCalculation;
+
+            fuelRequiredEl.textContent = `${fuelRequired.toFixed(2)} L`;
+            fuelCostEl.textContent = `₹${fuelCost.toFixed(2)}`;
+            totalCostEl.textContent = `₹${totalCost.toFixed(2)}`;
+            costPerKmEl.textContent = `₹${costPerKm.toFixed(2)}`;
+
+            // Show/hide toll cost section
+            if (tollCount > 0 && tollFees > 0) {
+                const totalTollCost = tollCount * tollFees;
+                tollCostEl.textContent = `₹${totalTollCost.toFixed(2)}`;
+                tollCostDesc.textContent = `${tollCount} × ₹${tollFees}`;
+                tollCostContainer.classList.remove('hidden');
+            } else {
+                tollCostContainer.classList.add('hidden');
+            }
+
+            copyBtn.disabled = false;
+            saveBtn.disabled = false;
+        }
+
+        // Handle copy functionality
+        async function handleCopy() {
+            if (!currentCalculation) return;
+
+            const { distance, fuelPrice, mileage, tollCount, tollFees, fuelRequired, fuelCost, totalCost, costPerKm } = currentCalculation;
+            const totalTollCost = tollCount * tollFees;
+
+            const resultsText = `🚗 Trip Cost Calculation
+📏 Distance: ${distance} km
+⛽ Fuel Price: ₹${fuelPrice}/L
+🚙 Vehicle Mileage: ${mileage} km/L${tollCount > 0 ? `
+🛣️ Tolls: ${tollCount} × ₹${tollFees} = ₹${totalTollCost.toFixed(2)}` : ''}
+
+📊 Results:
+• Fuel Required: ${fuelRequired.toFixed(2)} L
+• Fuel Cost: ₹${fuelCost.toFixed(2)}${tollCount > 0 ? `
+• Toll Cost: ₹${totalTollCost.toFixed(2)}` : ''}
+• Total Cost: ₹${totalCost.toFixed(2)}
+• Cost per KM: ₹${costPerKm.toFixed(2)}/km
+
+Generated by Fuel Cost Calculator`;
+
+            try {
+                await navigator.clipboard.writeText(resultsText);
+                
+                // Update button to show success
+                copyBtnText.textContent = 'Copied!';
+                copyBtn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>';
+                
+                showToast('Trip results copied to clipboard successfully.', 'success');
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    copyBtnText.textContent = 'Copy Results';
+                    copyBtn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>';
+                }, 2000);
+            } catch (error) {
+                showToast('Unable to copy to clipboard. Please try again.', 'error');
+            }
+        }
+
+        // Handle save functionality
+        function handleSave() {
+            if (!currentCalculation) return;
+
+            const trip = {
+                id: nextTripId++,
+                ...currentCalculation,
+                createdAt: new Date().toISOString()
+            };
+
+            trips.unshift(trip);
+            trips = trips.slice(0, 5); // Keep only last 5 trips
+
+            // Save to localStorage
+            localStorage.setItem('fuelCalculatorTrips', JSON.stringify(trips));
+            localStorage.setItem('fuelCalculatorNextId', nextTripId.toString());
+
+            renderTripHistory();
+            showToast('Your trip has been saved successfully.', 'success');
+        }
+
+        // Handle clear all trips
+        function handleClearAll() {
+            if (confirm('Are you sure you want to clear all trips?')) {
+                trips = [];
+                localStorage.setItem('fuelCalculatorTrips', '[]');
+                renderTripHistory();
+                showToast('All trips have been cleared successfully.', 'success');
+            }
+        }
+
+        // Handle delete single trip
+        function handleDeleteTrip(tripId) {
+            if (confirm('Are you sure you want to delete this trip?')) {
+                trips = trips.filter(trip => trip.id !== tripId);
+                localStorage.setItem('fuelCalculatorTrips', JSON.stringify(trips));
+                renderTripHistory();
+                showToast('Trip has been deleted successfully.', 'success');
+            }
+        }
+
+        // Render trip history
+        function renderTripHistory() {
+            if (trips.length === 0) {
+                tripHistoryContainer.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 013.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                        </svg>
+                        <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">No trips saved yet</p>
+                        <p style="font-size: 0.875rem;">Calculate and save your first trip to see it here</p>
+                    </div>
+                `;
+                clearAllContainer.classList.add('hidden');
+                return;
+            }
+
+            tripHistoryContainer.innerHTML = trips.map(trip => `
+                <div class="trip-item">
+                    <div class="trip-header">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        ${formatDate(new Date(trip.createdAt))}
+                    </div>
+                    <div class="trip-details">
+                        <div class="trip-detail">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 013.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                            </svg>
+                            <span class="trip-detail-label">Distance:</span>
+                            <span class="trip-detail-value">${trip.distance} km</span>
+                        </div>
+                        <div class="trip-detail">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            <span class="trip-detail-label">Fuel:</span>
+                            <span class="trip-detail-value">${trip.fuelRequired.toFixed(1)} L</span>
+                        </div>
+                        ${trip.tollCount > 0 ? `
+                        <div class="trip-detail">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span class="trip-detail-label">Tolls:</span>
+                            <span class="trip-detail-value">${trip.tollCount} × ₹${trip.tollFees}</span>
+                        </div>
+                        ` : ''}
+                        <div class="trip-detail">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                            </svg>
+                            <span class="trip-detail-label">Total:</span>
+                            <span class="trip-detail-value" style="color: #059669;">₹${trip.totalCost.toFixed(0)}</span>
+                        </div>
+                    </div>
+                    <div class="trip-actions">
+                        <button class="btn btn-danger" onclick="handleDeleteTrip(${trip.id})" style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            clearAllContainer.classList.remove('hidden');
+        }
+
+        // Format date for display
+        function formatDate(date) {
+            const now = new Date();
+            const diffTime = Math.abs(now.getTime() - date.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                return `Today, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+            } else if (diffDays === 2) {
+                return `Yesterday, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+            } else {
+                return `${diffDays - 1} days ago, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
